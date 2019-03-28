@@ -1,6 +1,4 @@
-import React, { Component } from "react";
-import Signin from "./Components/Signin";
-import "./App.css";
+import React, { Component, memo } from "react";
 import {
   CognitoUserPool,
   CognitoUserAttribute,
@@ -8,11 +6,16 @@ import {
   AuthenticationDetails
 } from "amazon-cognito-identity-js";
 import * as AWS from "aws-sdk/global";
-import Logout from "./Components/Logout";
-import { Container, Row, Col } from "reactstrap";
-import Todo from "./Components/Todo";
-import AddTodo from "./Components/AddTodo";
 import axios from "axios";
+import Loader from "react-loader-spinner";
+
+import Layout from "./Components/Layout";
+import Signin from "./Components/Signin";
+import Logout from "./Components/Logout";
+import AddTodoDisplay from "./Components/AddTodoDisplay";
+import Todo from "./Components/Todo";
+import TodoDisplay from "./Components/TodoDisplay";
+import TodoList from "./Components/TodoList";
 
 const poolData = {
   UserPoolId: "us-east-2_Gu32DUJYY",
@@ -26,11 +29,15 @@ class App extends Component {
   state = {
     username: "",
     password: "",
-    loader: false,
+    loader: true,
     user: "",
     title: "",
     description: "",
     todos: null
+  };
+
+  onChange = e => {
+    this.setState({ [e.target.name]: e.target.value });
   };
 
   getToDos = async () => {
@@ -44,7 +51,35 @@ class App extends Component {
       .then(res => {
         return res.data;
       })
-      .catch(err => console.error(err));
+      .catch(err => {
+        console.error(err);
+        alert("Error Retrieving Todos");
+      });
+
+    return data;
+  };
+
+  deleteTodo = async todoID => {
+    const accessToken = await this.retrieveCurrentUser();
+    let data = await axios
+      .delete(`http://localhost:3001/todos/delete/${todoID}`, {
+        headers: {
+          accessToken: accessToken.accessToken.jwtToken
+        }
+      })
+      .then(res => {
+        this.getToDos().then(todos => {
+          this.setState({
+            loader: false,
+            username: cognitoUser.username,
+            todos
+          });
+        });
+      })
+      .catch(err => {
+        console.error(err);
+        alert("Error Deleting Todo");
+      });
 
     return data;
   };
@@ -66,8 +101,51 @@ class App extends Component {
           }
         }
       )
-      .then(res => console.log(res))
-      .catch(err => console.error(err));
+      .then(res => {
+        this.getToDos().then(todos => {
+          this.setState({
+            loader: false,
+            username: cognitoUser.username,
+            todos
+          });
+        });
+      })
+      .catch(err => {
+        console.error(err);
+        alert("Error Adding Todo");
+      });
+  };
+
+  editTodo = async todoID => {
+    const { title, description } = this.state;
+    const accessToken = await this.retrieveCurrentUser();
+
+    axios
+      .put(
+        `http://localhost:3001/todos/${todoID}`,
+        {
+          title,
+          description
+        },
+        {
+          headers: {
+            accessToken: accessToken.accessToken.jwtToken
+          }
+        }
+      )
+      .then(res => {
+        this.getToDos().then(todos => {
+          this.setState({
+            loader: false,
+            username: cognitoUser.username,
+            todos
+          });
+        });
+      })
+      .catch(err => {
+        console.error(err);
+        alert("Error Editing Todo");
+      });
   };
 
   retrieveCurrentUser = () => {
@@ -75,89 +153,35 @@ class App extends Component {
       let session = cognitoUser.getSession((err, session) => {
         if (err) {
           alert(err.message || JSON.stringify(err));
-          this.setState({ loader: false });
           return;
         } else {
-          console.log(session);
           return session;
         }
-        // NOTE: getSession must be called to authenticate user before calling getUserAttributes
-        // cognitoUser.getUserAttributes(function(err, attributes) {
-        //   if (err) {
-        //     // Handle error
-        //   } else {
-        //     // Do something with attributes
-        //   }
-        // });
-
-        // AWS.config.credentials = new AWS.CognitoIdentityCredentials({
-        //   IdentityPoolId: "...", // your identity pool id here
-        //   Logins: {
-        //     // Change the key below according to the specific region your user pool is in.
-        //     "cognito-idp.<region>.amazonaws.com/<YOUR_USER_POOL_ID>": session
-        //       .getIdToken()
-        //       .getJwtToken()
-        //   }
-        // });
-
-        // Instantiate aws sdk service objects now that the credentials have been updated.
-        // example: var s3 = new AWS.S3();
       });
       return session;
     }
   };
 
-  onChange = e => {
-    this.setState({ [e.target.name]: e.target.value });
-  };
-
-  displayTodos = numTodos => {};
-
-  loadTodos = () => {};
-
   login = e => {
     e.preventDefault();
     const { username, password } = this.state;
-    var authenticationData = {
+    let authenticationData = {
       Username: username,
       Password: password
     };
-    var authenticationDetails = new AuthenticationDetails(authenticationData);
+    let authenticationDetails = new AuthenticationDetails(authenticationData);
 
-    var userPool = new CognitoUserPool(poolData);
-    var userData = {
+    let userPool = new CognitoUserPool(poolData);
+    let userData = {
       Username: username,
       Pool: userPool
     };
-    var cognitoUser = new CognitoUser(userData);
+    let cognitoUser = new CognitoUser(userData);
     cognitoUser.authenticateUser(authenticationDetails, {
       onSuccess: result => {
-        var accessToken = result.getAccessToken().getJwtToken();
-        var cognitoUser = userPool.getCurrentUser();
-        this.setState({ user: cognitoUser });
-
-        // this.setState({user: })
-        //POTENTIAL: Region needs to be set if not already set previously elsewhere.
-        // AWS.config.region = '<region>';
-
-        // AWS.config.credentials = new AWS.CognitoIdentityCredentials({
-        //     IdentityPoolId : '...', // your identity pool id here
-        //     Logins : {
-        //         // Change the key below according to the specific region your user pool is in.
-        //         'cognito-idp.<region>.amazonaws.com/<YOUR_USER_POOL_ID>' : result.getIdToken().getJwtToken()
-        //     }
-        // });
-
-        //refreshes credentials using AWS.CognitoIdentity.getCredentialsForIdentity()
-        // AWS.config.credentials.refresh((error) => {
-        //     if (error) {
-        //          console.error(error);
-        //     } else {
-        //          // Instantiate aws sdk service objects now that the credentials have been updated.
-        //          // example: var s3 = new AWS.S3();
-        //          console.log('Successfully logged!');
-        //     }
-        // });
+        let accessToken = result.getAccessToken().getJwtToken();
+        let cognitoUser = userPool.getCurrentUser();
+        this.setState({ username: cognitoUser.username });
       },
 
       onFailure: function(err) {
@@ -167,16 +191,11 @@ class App extends Component {
   };
 
   logout = () => {
-    var userPool = new CognitoUserPool(poolData);
-    var cognitoUser = userPool.getCurrentUser();
     cognitoUser.signOut();
-    this.setState({ user: "" });
+    this.setState({ username: "" });
   };
 
   componentDidMount() {
-    var userPool = new CognitoUserPool(poolData);
-    var cognitoUser = userPool.getCurrentUser();
-
     if (cognitoUser != null) {
       cognitoUser.getSession((err, session) => {
         if (err) {
@@ -186,78 +205,47 @@ class App extends Component {
         }
         this.getToDos().then(todos => {
           console.log(todos);
-          this.setState({ loader: false, user: cognitoUser, todos });
+          this.setState({
+            loader: false,
+            username: cognitoUser.username,
+            todos
+          });
         });
-
-        // NOTE: getSession must be called to authenticate user before calling getUserAttributes
-        // cognitoUser.getUserAttributes(function(err, attributes) {
-        //   if (err) {
-        //     // Handle error
-        //   } else {
-        //     // Do something with attributes
-        //   }
-        // });
-
-        // AWS.config.credentials = new AWS.CognitoIdentityCredentials({
-        //   IdentityPoolId: "...", // your identity pool id here
-        //   Logins: {
-        //     // Change the key below according to the specific region your user pool is in.
-        //     "cognito-idp.<region>.amazonaws.com/<YOUR_USER_POOL_ID>": session
-        //       .getIdToken()
-        //       .getJwtToken()
-        //   }
-        // });
-
-        // Instantiate aws sdk service objects now that the credentials have been updated.
-        // example: var s3 = new AWS.S3();
       });
+    } else {
+      this.setState({ loader: false, username: null});
     }
   }
+
   render() {
-    const { user, username, password, todos } = this.state;
-    console.log(user);
-    if (user) {
+    const { username, password, todos, loader } = this.state;
+    if (loader) {
+      return <Loader type="Puff" color="#00BFFF" height="100" width="100" />;
+    }
+    if (username) {
       return (
-        <Container>
-          <Row>
-            <Col sm={{ size: 6, offset: 3 }}>hello {user.username}</Col>
-            <Col sm="3">
-              <Logout logout={this.logout} />
-            </Col>
-          </Row>
-          <Row>
-            {this.state.todos &&
-              this.state.todos.map(todo => (
-                <Todo
-                  key={todo._id}
-                  title={todo.title}
-                  description={todo.description}
-                  date={todo.date}
-                />
-              ))}
-          </Row>
-          <Row>
-            <Col sm={{ size: 6, offset: 3 }}>
-              <AddTodo
-                onChange={this.onChange}
-                title={this.title}
-                description={this.description}
-                addTodo={this.addTodo}
-              />
-            </Col>
-          </Row>
-        </Container>
+        <Layout>
+          <h2 style={{ textAlign: "center" }}>{username}'s Todos</h2>
+          <Logout logout={this.logout} />
+          {todos && <TodoList todos={todos} deleteTodo={this.deleteTodo} />}
+          <AddTodoDisplay
+            onChange={this.onChange}
+            title={this.state.title}
+            description={this.state.description}
+            addTodo={this.addTodo}
+          />
+        </Layout>
       );
     } else {
       return (
-        <>
+        <Layout>
           <Signin
             login={this.login}
             onChange={this.onChange}
             username={username}
             password={password}
           />
-        </>
+        </Layout>
       );
     }
   }
