@@ -4,9 +4,13 @@
   "private": true,
   "dependencies": {
     "amazon-cognito-identity-js": "^3.0.9",
+    "aws-sdk": "^2.428.0",
+    "axios": "^0.18.0",
+    "bootstrap": "^4.3.1",
     "react": "^16.8.5",
     "react-dom": "^16.8.5",
-    "react-scripts": "2.1.8"
+    "react-scripts": "2.1.8",
+    "reactstrap": "^7.1.0"
   },
   "scripts": {
     "start": "react-scripts start",
