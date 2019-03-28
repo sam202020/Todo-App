@@ -1,0 +1,19 @@
+{
+    "local": {
+        "awscloudformation": {
+            "AuthRoleName": "yaro-todo-cognito-20190328112316-authRole",
+            "UnauthRoleArn": "arn:aws:iam::992917019545:role/yaro-todo-cognito-20190328112316-unauthRole",
+            "AuthRoleArn": "arn:aws:iam::992917019545:role/yaro-todo-cognito-20190328112316-authRole",
+            "Region": "us-east-1",
+            "DeploymentBucketName": "yaro-todo-cognito-20190328112316-deployment",
+            "UnauthRoleName": "yaro-todo-cognito-20190328112316-unauthRole",
+            "StackName": "yaro-todo-cognito-20190328112316",
+            "StackId": "arn:aws:cloudformation:us-east-1:992917019545:stack/yaro-todo-cognito-20190328112316/691f87f0-516d-11e9-9ad1-0ea1c9c8db82"
+        },
+        "categories": {
+            "auth": {
+                "cognito7230a4f3": {}
+            }
+        }
+    }
+}

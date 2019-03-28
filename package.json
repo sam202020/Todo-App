@@ -5,8 +5,8 @@
   "dependencies": {
     "@material-ui/core": "^3.9.2",
     "@material-ui/icons": "^3.0.2",
-    "amazon-cognito-identity-js": "^3.0.9",
-    "aws-sdk": "^2.428.0",
+    "aws-amplify": "^1.1.22",
+    "aws-amplify-react": "^2.3.2",
     "axios": "^0.18.0",
     "bootstrap": "^4.3.1",
     "react": "^16.8.5",

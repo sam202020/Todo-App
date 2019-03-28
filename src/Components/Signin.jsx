@@ -43,8 +43,6 @@ export default class Signin extends Component {
                   id="username"
                   name='username'
                   placeholder="username"
-                  value={username}
-                  onChange={this.onChange}
                 />
               </FormGroup>
               <FormGroup>
@@ -54,8 +52,6 @@ export default class Signin extends Component {
                   id="password"
                   name='password'
                   placeholder="password"
-                  value={password}
-                  onChange={this.onChange}
                 />
               </FormGroup>
             </Form>
