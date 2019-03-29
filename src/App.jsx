@@ -176,10 +176,12 @@ class App extends Component {
     }
     return (
       <Layout>
+        <div style={{display: 'flex', justifyContent: 'space-evenly'}}>
         <h2 style={{ textAlign: "center" }}>{username}'s Todos</h2>
-        <Logout logout={this.logout} />
-        {todos && <TodoList todos={todos} deleteTodo={this.deleteTodo} />}
+        <Logout logout={this.logout} /></div>
+        {todos && <TodoList todos={todos} deleteTodo={this.deleteTodo} onChange={this.onChange}/>}
         <AddTodoDisplay
+          type={"Add"}
           onChange={this.onChange}
           title={this.state.title}
           description={this.state.description}

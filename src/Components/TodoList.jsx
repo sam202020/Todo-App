@@ -14,6 +14,7 @@ const TodoList = memo(props => (
               key={todo._id}
               divider={index < props.todos.length - 1}
               deleteTodo={props.deleteTodo}
+              onChange={props.onChange}
             //   onButtonClick={() => props.onItemRemove(idx)}
             //   onCheckBoxToggle={() => props.onItemCheck(idx)}
             />

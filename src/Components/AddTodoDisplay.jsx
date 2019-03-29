@@ -6,8 +6,8 @@ const AddtodoDisplay = memo(props => (
     <Grid container>
       <Grid xs={10} md={11} item style={{ paddingRight: 16 }}>
         <TextField
-          placeholder="Todo Title Here"
-          value={props.title}
+          placeholder={`${props.type} Todo Title Here`}
+          defaultValue={props.title}
           name="title"
           onChange={props.onChange}
           //   onKeyPress={props.onInputKeyPress}
@@ -17,8 +17,8 @@ const AddtodoDisplay = memo(props => (
 
       <Grid xs={10} md={11} item style={{ paddingRight: 16 }}>
         <TextField
-          placeholder="Add Todo Description Here"
-          value={props.description}
+          placeholder={`${props.type} Todo Description Here`}
+          defaultValue={props.description}
           onChange={props.onChange}
           name="description"
           //   onKeyPress={props.onInputKeyPress}
@@ -32,8 +32,7 @@ const AddtodoDisplay = memo(props => (
           variant="outlined"
           onClick={props.addTodo}
         >
-          {" "}
-          Add{" "}
+          {props.type}
         </Button>
       </Grid>
     </Grid>

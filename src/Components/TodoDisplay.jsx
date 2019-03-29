@@ -1,5 +1,6 @@
-import React, { memo, PureComponent } from "react";
+import React, { PureComponent } from "react";
 import DeleteOutlined from "@material-ui/icons/DeleteOutlined";
+import EditOutlined from "@material-ui/icons/EditOutlined";
 import {
   List,
   ListItem,
@@ -16,19 +17,17 @@ import { withStyles } from "@material-ui/core/styles";
 import ListSubheader from "@material-ui/core/ListSubheader";
 import ListItemIcon from "@material-ui/core/ListItemIcon";
 import Collapse from "@material-ui/core/Collapse";
-import InboxIcon from "@material-ui/icons/MoveToInbox";
-import DraftsIcon from "@material-ui/icons/Drafts";
-import SendIcon from "@material-ui/icons/Send";
 import ExpandLess from "@material-ui/icons/ExpandLess";
 import ExpandMore from "@material-ui/icons/ExpandMore";
-import StarBorder from "@material-ui/icons/StarBorder";
 import Modal from "@material-ui/core/Modal";
 import Typography from "@material-ui/core/Typography";
+
+import AddTodoDisplay from "./AddTodoDisplay";
 
 const styles = theme => ({
   title: {
     fontWeight: "bold",
-    paddingLedt: 20
+    cursor: "pointer"
   },
   modal: {
     position: "absolute",
@@ -43,20 +42,11 @@ const styles = theme => ({
   }
 });
 
-// function getModalStyle() {
-//   const top = 50
-//   const left = 50
-
-//   return {
-//     top: `${top}%`,
-//     left: `${left}%`,
-//     transform: `translate(-${top}%, -${left}%)`
-//   };
-// }
 class TodoDisplay extends PureComponent {
   state = {
     modal: false,
-    open: true
+    open: false,
+    edit: false
   };
 
   handleClick = () => {
@@ -67,37 +57,53 @@ class TodoDisplay extends PureComponent {
     this.setState(state => ({ modal: !state.modal }));
   };
 
-  handleDelete = async (id) => {
+  handleDelete = async id => {
     this.props.deleteTodo(id);
-    // console.log(didDelete)
-    // if (didDelete._id === id) {
-    //     this.handleModal();
-    // }
     this.handleModal();
-  }
+  };
+
+  handleEdit = () => {
+    this.setState(state => ({ edit: !state.edit }));
+  };
 
   render() {
+    const date = new Date(this.props.date).toDateString();
     return (
       <>
         <ListItem onClick={this.handleClick} divider>
+          <ListItemText primary={date} />
           <ListItemText
             classes={{ primary: this.props.classes.title }}
             primary={this.props.title}
           />
-          <ListItemSecondaryAction onClick={this.handleModal}>
+          <ListItemIcon>
+            <IconButton aria-label="Edit Todo">
+              <EditOutlined
+                onClick={this.handleEdit}
+                style={{ cursor: "pointer" }}
+              />
+            </IconButton>
+          </ListItemIcon>
+          <ListItemSecondaryAction>
             <IconButton aria-label="Delete Todo">
-              <DeleteOutlined />
+              <DeleteOutlined onClick={this.handleModal} />
             </IconButton>
           </ListItemSecondaryAction>
         </ListItem>
         <Collapse in={this.state.open} timeout="auto" unmountOnExit>
           <List component="div">
             <ListItem button divider={this.props.divider}>
-              <ListItemText inset style={{ paddingLeft: 50 }}>
-                {this.props.description}
-              </ListItemText>
+              <ListItemText inset>{this.props.description}</ListItemText>
             </ListItem>
           </List>
+        </Collapse>
+        <Collapse in={this.state.edit} timeout="auto" unmountOnExit>
+          <AddTodoDisplay
+            type={'Edit'}
+            title={this.props.title}
+            description={this.props.description}
+            onChange={this.props.onChange}
+          />
         </Collapse>
         <Modal open={this.state.modal}>
           <div className={this.props.classes.modal}>
@@ -115,7 +121,7 @@ class TodoDisplay extends PureComponent {
               variant="contained"
               color="primary"
               style={{ marginLeft: 30, marginRight: 150 }}
-              onClick={()=>this.handleDelete(this.props._id)}
+              onClick={() => this.handleDelete(this.props._id)}
             >
               Yes
             </Button>
