@@ -6,6 +6,7 @@ import Auth from "@aws-amplify/auth";
 import { withAuthenticator } from "aws-amplify-react";
 import Amplify from "aws-amplify";
 import awsmobile from "./aws-exports";
+import { Hub } from 'aws-amplify';
 
 import Layout from "./Components/Layout";
 import Signin from "./Components/Signin";
@@ -24,6 +25,11 @@ const poolData = {
 
 const userPool = new CognitoUserPool(poolData);
 
+Hub.listen('auth', (data) => {
+  const { payload } = data;
+  console.log('A new auth event has happened: ', data.payload.data.username + ' has ' + data.payload.event);
+})
+
 class App extends Component {
   state = {
     loader: true,
@@ -37,11 +43,11 @@ class App extends Component {
   };
 
   getToDos = async () => {
-    const accessToken = await this.retrieveCurrentUser();
+    const accessToken = await this.retrieveCurrentUserAccessTokenAccessToken();
     let data = await axios
       .get("http://localhost:3001/todos", {
         headers: {
-          accessToken: accessToken.accessToken.jwtToken
+          accessToken
         }
       })
       .then(res => {
@@ -56,7 +62,7 @@ class App extends Component {
   };
 
   deleteTodo = async todoID => {
-    const accessToken = await this.retrieveCurrentUser();
+    const accessToken = await this.retrieveCurrentUserAccessToken();
     let data = await axios
       .delete(`http://localhost:3001/todos/delete/${todoID}`, {
         headers: {
@@ -81,7 +87,7 @@ class App extends Component {
 
   addTodo = async () => {
     const { title, description } = this.state;
-    const accessToken = await this.retrieveCurrentUser();
+    const accessToken = await this.retrieveCurrentUserAccessToken();
 
     axios
       .post(
@@ -112,7 +118,7 @@ class App extends Component {
 
   editTodo = async todoID => {
     const { title, description } = this.state;
-    const accessToken = await this.retrieveCurrentUser();
+    const accessToken = await this.retrieveCurrentUserAccessToken();
 
     axios
       .put(
@@ -141,25 +147,17 @@ class App extends Component {
       });
   };
 
-  retrieveCurrentUser = async () => {
-    let cognitoUser = await userPool.getCurrentUser();
-    let session = cognitoUser.getSession((err, session) => {
-      if (err) {
-        alert(err.message || JSON.stringify(err));
-        return;
-      } else {
-        return session;
-      }
-    });
-    return session;
+  retrieveCurrentUserAccessTokenAccessToken = async () => {
+    const user = await Auth.currentAuthenticatedUser();
+    const accessToken = user.signInUserSession.accessToken.jwtToken;
+    return accessToken
   };
 
   logout = async () => {
     await Auth.signOut();
   };
 
-  async componentDidMount() {
-    const user = await Auth.currentAuthenticatedUser();
+  componentDidMount() {
     this.getToDos().then(todos => {
       this.setState({
         loader: false,

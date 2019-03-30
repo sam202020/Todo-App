@@ -77,16 +77,17 @@ class TodoDisplay extends PureComponent {
             primary={this.props.title}
           />
           <ListItemIcon>
-            <IconButton aria-label="Edit Todo">
-              <EditOutlined
-                onClick={this.handleEdit}
-                style={{ cursor: "pointer" }}
-              />
+            <IconButton
+              aria-label="Edit Todo"
+              onClick={this.handleEdit}
+              style={{ cursor: "pointer" }}
+            >
+              <EditOutlined />
             </IconButton>
           </ListItemIcon>
           <ListItemSecondaryAction>
-            <IconButton aria-label="Delete Todo">
-              <DeleteOutlined onClick={this.handleModal} />
+            <IconButton aria-label="Delete Todo" onClick={this.handleModal}>
+              <DeleteOutlined  />
             </IconButton>
           </ListItemSecondaryAction>
         </ListItem>
@@ -99,7 +100,7 @@ class TodoDisplay extends PureComponent {
         </Collapse>
         <Collapse in={this.state.edit} timeout="auto" unmountOnExit>
           <AddTodoDisplay
-            type={'Edit'}
+            type={"Edit"}
             title={this.props.title}
             description={this.props.description}
             onChange={this.props.onChange}
