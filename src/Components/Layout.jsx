@@ -1,7 +1,7 @@
-import React, { Component, memo } from "react";
+import React, { memo } from "react";
 import { AppBar, Typography, Toolbar, Paper } from "@material-ui/core";
 
-const Layout = memo(props => (
+const Layout = props => (
   <Paper
     elevation={0}
     style={{ padding: 0, margin: 0, backgroundColor: "#fafafa" }}
@@ -13,6 +13,6 @@ const Layout = memo(props => (
     </AppBar>
     {props.children}
   </Paper>
-));
+);
 
 export default Layout;

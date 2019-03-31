@@ -1,4 +1,14 @@
-import React, { Component, memo } from "react";
+import React, { Component } from "react";
+import {
+  Typography,
+  Toolbar,
+  Paper,
+  Checkbox,
+  List,
+  Button,
+  Collapse
+} from "@material-ui/core";
+import DeleteIcon from "@material-ui/icons/Delete";
 import axios from "axios";
 import Loader from "react-loader-spinner";
 import { CognitoUserPool } from "amazon-cognito-identity-js";
@@ -6,15 +16,14 @@ import Auth from "@aws-amplify/auth";
 import { withAuthenticator } from "aws-amplify-react";
 import Amplify from "aws-amplify";
 import awsmobile from "./aws-exports";
-import { Hub } from 'aws-amplify';
 
 import Layout from "./Components/Layout";
-import Signin from "./Components/Signin";
 import Logout from "./Components/Logout";
 import AddTodoDisplay from "./Components/AddTodoDisplay";
 import Todo from "./Components/Todo";
 import TodoDisplay from "./Components/TodoDisplay";
 import TodoList from "./Components/TodoList";
+
 
 Amplify.configure(awsmobile);
 
@@ -25,17 +34,11 @@ const poolData = {
 
 const userPool = new CognitoUserPool(poolData);
 
-Hub.listen('auth', (data) => {
-  const { payload } = data;
-  console.log('A new auth event has happened: ', data.payload.data.username + ' has ' + data.payload.event);
-})
-
 class App extends Component {
   state = {
     loader: true,
-    title: "",
-    description: "",
-    todos: null
+    todos: [],
+    checked: []
   };
 
   onChange = e => {
@@ -43,7 +46,7 @@ class App extends Component {
   };
 
   getToDos = async () => {
-    const accessToken = await this.retrieveCurrentUserAccessTokenAccessToken();
+    const accessToken = await this.retrieveCurrentUserAccessToken();
     let data = await axios
       .get("http://localhost:3001/todos", {
         headers: {
@@ -62,11 +65,11 @@ class App extends Component {
   };
 
   deleteTodo = async todoID => {
-    const accessToken = await this.retrieveCurrentUserAccessToken();
+    const accessToken = this.retrieveCurrentUserAccessToken();
     let data = await axios
       .delete(`http://localhost:3001/todos/delete/${todoID}`, {
         headers: {
-          accessToken: accessToken.accessToken.jwtToken
+          accessToken
         }
       })
       .then(res => {
@@ -85,8 +88,34 @@ class App extends Component {
     return data;
   };
 
-  addTodo = async () => {
-    const { title, description } = this.state;
+  // deleteMultipleTodos = async todoID => {
+  //   const accessToken = this.retrieveCurrentUserAccessToken();
+  //   let data = await axios
+  //     .delete(`http://localhost:3001/todos/delete/`, {
+
+  //     } {
+  //       headers: {
+  //         accessToken
+  //       }
+  //     })
+  //     .then(res => {
+  //       this.getToDos().then(todos => {
+  //         this.setState({
+  //           loader: false,
+  //           todos
+  //         });
+  //       });
+  //     })
+  //     .catch(err => {
+  //       console.error(err);
+  //       alert("Error Deleting Todo");
+  //     });
+
+  //   return data;
+  // };
+
+  addTodo = async (title, description) => {
+    console.log(title, description)
     const accessToken = await this.retrieveCurrentUserAccessToken();
 
     axios
@@ -98,7 +127,7 @@ class App extends Component {
         },
         {
           headers: {
-            accessToken: accessToken.accessToken.jwtToken
+            accessToken
           }
         }
       )
@@ -116,9 +145,8 @@ class App extends Component {
       });
   };
 
-  editTodo = async todoID => {
-    const { title, description } = this.state;
-    const accessToken = await this.retrieveCurrentUserAccessToken();
+  editTodo = todoID => (title, description) => {
+    const accessToken = this.retrieveCurrentUserAccessToken();
 
     axios
       .put(
@@ -129,7 +157,7 @@ class App extends Component {
         },
         {
           headers: {
-            accessToken: accessToken.accessToken.jwtToken
+            accessToken
           }
         }
       )
@@ -147,43 +175,112 @@ class App extends Component {
       });
   };
 
-  retrieveCurrentUserAccessTokenAccessToken = async () => {
+  retrieveCurrentUserAccessToken = async () => {
     const user = await Auth.currentAuthenticatedUser();
     const accessToken = user.signInUserSession.accessToken.jwtToken;
-    return accessToken
+    return accessToken;
   };
 
   logout = async () => {
     await Auth.signOut();
   };
 
+  setChecked = (e, checked) => {
+    const ids = this.state.todos.map(todo => todo._id);
+    if (checked === true) {
+      this.setState({ checked: ids });
+    } else {
+      this.setState({ checked: [] });
+    }
+  };
+
+  setIndivChecked = (checked, id) => {
+    let ids = this.state.checked.map(id => id);
+    if (checked === true) {
+      ids.push(id);
+      this.setState({ checked: ids });
+    } else {
+      let newids = ids.filter(i => i !== id);
+      this.setState({ checked: newids });
+    }
+  };
+
   componentDidMount() {
-    this.getToDos().then(todos => {
-      this.setState({
-        loader: false,
-        todos
+    this.getToDos()
+      .then(todos => {
+        this.setState({
+          loader: false,
+          todos
+        });
+      })
+      .catch(err => {
+        this.setState({ loader: false });
       });
-    });
   }
 
   render() {
-    const { password, todos, loader } = this.state;
     const { username } = this.props.authData;
+    const { todos, loader, checked } = this.state;
     if (loader) {
-      return <Loader type="Puff" color="#00BFFF" height="100" width="100" />;
+      return (
+        <div style={{ position: "fixed", top: "50%", left: "50%" }}>
+          <Loader type="Puff" color="#00BFFF" height="100" width="100" />
+        </div>
+      );
     }
     return (
       <Layout>
-        <div style={{display: 'flex', justifyContent: 'space-evenly'}}>
-        <h2 style={{ textAlign: "center" }}>{username}'s Todos</h2>
-        <Logout logout={this.logout} /></div>
-        {todos && <TodoList todos={todos} deleteTodo={this.deleteTodo} onChange={this.onChange}/>}
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-evenly",
+            marginTop: 10
+          }}
+        >
+          <h2 style={{ textAlign: "center" }}>{username}'s Todos</h2>
+          <Logout logout={this.logout} />
+        </div>
+        <Paper style={{ margin: 16 }}>
+          {todos[0] && (
+            <List>
+              <div style={{ display: "flex", flexDirection: "row" }}>
+                <Checkbox
+                  style={{ marginLeft: 16 }}
+                  checked={checked.length === todos.length}
+                  onChange={this.setChecked}
+                />{" "}
+                <Collapse in={checked.length > 0} timeout="auto" unmountOnExit>
+                  <Button variant="contained" color="secondary">
+                    Delete <DeleteIcon />
+                  </Button>
+                </Collapse>
+              </div>
+              {todos.map((todo, index) => (
+                <TodoDisplay
+                  {...todo}
+                  button={this.state.button}
+                  key={todo._id}
+                  checked={checked}
+                  setChecked={this.setIndivChecked}
+                  divider={index < todos.length - 1}
+                  deleteTodo={this.deleteTodo}
+                  onChange={this.onChange}
+                >
+                  <AddTodoDisplay
+                    type={"Edit"}
+                    addTodo={this.editTodo}
+                  />
+                </TodoDisplay>
+              ))}
+            </List>
+          )}
+        </Paper>
+        <Typography variant="h6" style={{ textAlign: "center" }}>
+          Add A ToDo
+        </Typography>
         <AddTodoDisplay
           type={"Add"}
-          onChange={this.onChange}
-          title={this.state.title}
-          description={this.state.description}
-          addTodo={this.addTodo}
+          changeTodo={this.addTodo}
         />
       </Layout>
     );

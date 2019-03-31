@@ -1,4 +1,5 @@
-import React, { PureComponent } from "react";
+import React, { Component } from "react";
+import { withStyles } from "@material-ui/core/styles";
 import DeleteOutlined from "@material-ui/icons/DeleteOutlined";
 import EditOutlined from "@material-ui/icons/EditOutlined";
 import {
@@ -8,19 +9,12 @@ import {
   IconButton,
   ListItemText,
   ListItemSecondaryAction,
-  TextField,
-  Paper,
   Button,
-  Grid
+  Collapse,
+  Modal,
+  Typography,
+  ListItemIcon
 } from "@material-ui/core";
-import { withStyles } from "@material-ui/core/styles";
-import ListSubheader from "@material-ui/core/ListSubheader";
-import ListItemIcon from "@material-ui/core/ListItemIcon";
-import Collapse from "@material-ui/core/Collapse";
-import ExpandLess from "@material-ui/icons/ExpandLess";
-import ExpandMore from "@material-ui/icons/ExpandMore";
-import Modal from "@material-ui/core/Modal";
-import Typography from "@material-ui/core/Typography";
 
 import AddTodoDisplay from "./AddTodoDisplay";
 
@@ -42,7 +36,7 @@ const styles = theme => ({
   }
 });
 
-class TodoDisplay extends PureComponent {
+class TodoDisplay extends Component {
   state = {
     modal: false,
     open: false,
@@ -66,13 +60,22 @@ class TodoDisplay extends PureComponent {
     this.setState(state => ({ edit: !state.edit }));
   };
 
+  setChecked = (e, checked) => {
+    this.props.setChecked(checked, this.props._id);
+  };
+
   render() {
     const date = new Date(this.props.date).toDateString();
     return (
       <>
-        <ListItem onClick={this.handleClick} divider>
+        <ListItem divider>
+          <Checkbox
+            checked={this.props.checked.includes(this.props._id)}
+            onChange={this.setChecked}
+          />
           <ListItemText primary={date} />
           <ListItemText
+            onClick={this.handleClick}
             classes={{ primary: this.props.classes.title }}
             primary={this.props.title}
           />
@@ -87,7 +90,7 @@ class TodoDisplay extends PureComponent {
           </ListItemIcon>
           <ListItemSecondaryAction>
             <IconButton aria-label="Delete Todo" onClick={this.handleModal}>
-              <DeleteOutlined  />
+              <DeleteOutlined />
             </IconButton>
           </ListItemSecondaryAction>
         </ListItem>
@@ -99,12 +102,14 @@ class TodoDisplay extends PureComponent {
           </List>
         </Collapse>
         <Collapse in={this.state.edit} timeout="auto" unmountOnExit>
-          <AddTodoDisplay
+          {/* <AddTodoDisplay
             type={"Edit"}
             title={this.props.title}
             description={this.props.description}
             onChange={this.props.onChange}
-          />
+            addTodo={this.props.editTodo}
+          /> */}
+          {this.props.children}
         </Collapse>
         <Modal open={this.state.modal}>
           <div className={this.props.classes.modal}>
@@ -115,9 +120,7 @@ class TodoDisplay extends PureComponent {
             >
               Are you sure you would like to delete this ToDo?
             </Typography>
-            {/* <Typography variant="subtitle1" id="simple-modal-description">
-              Duis mollis, est non commodo luctus, nisi erat porttitor ligula.
-            </Typography> */}
+
             <Button
               variant="contained"
               color="primary"
@@ -141,22 +144,3 @@ class TodoDisplay extends PureComponent {
 }
 
 export default withStyles(styles)(TodoDisplay);
-
-// const TodoDisplay = memo(props => (
-//   <ListItem divider={props.divider}>
-//     <Checkbox
-//     //   onClick={props.checkBoxToggle}
-//     //   checked={props.checked}
-//       disableRipple
-//     />
-
-//     <ListItemText primary={props.title} />
-//     <ListItemSecondaryAction>
-//       <IconButton aria-label="Delete Todo" >
-//         <DeleteOutlined />
-//       </IconButton>
-//     </ListItemSecondaryAction>
-//   </ListItem>
-// ));
-
-// export default TodoDisplay
