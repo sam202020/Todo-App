@@ -9,14 +9,12 @@ import {
   IconButton,
   ListItemText,
   ListItemSecondaryAction,
-  Button,
   Collapse,
-  Modal,
-  Typography,
   ListItemIcon
 } from "@material-ui/core";
 
 import AddTodoDisplay from "./AddTodoDisplay";
+import DeleteTodoModal from "./DeleteTodoModal";
 
 const styles = theme => ({
   title: {
@@ -39,12 +37,14 @@ const styles = theme => ({
 class TodoDisplay extends Component {
   state = {
     modal: false,
-    open: false,
+    descriptionDisplayed: false,
     edit: false
   };
 
   handleClick = () => {
-    this.setState(state => ({ open: !state.open }));
+    this.setState(state => ({
+      descriptionDisplayed: !state.descriptionDisplayed
+    }));
   };
 
   handleModal = () => {
@@ -64,20 +64,31 @@ class TodoDisplay extends Component {
     this.props.setChecked(checked, this.props._id);
   };
 
+  editTodo = async (id, title, description) => {
+    let edited = await this.props.editTodo(id, title, description);
+    if (edited.status === 200) {
+      this.handleEdit();
+      return 200;
+    }
+    return "error";
+  };
+
   render() {
     const date = new Date(this.props.date).toDateString();
+    const { title, description, _id, checked, classes, divider } = this.props;
+    const { descriptionDisplayed, modal, edit } = this.state;
     return (
       <>
         <ListItem divider>
           <Checkbox
-            checked={this.props.checked.includes(this.props._id)}
+            checked={checked.includes(_id)}
             onChange={this.setChecked}
           />
           <ListItemText primary={date} />
           <ListItemText
             onClick={this.handleClick}
-            classes={{ primary: this.props.classes.title }}
-            primary={this.props.title}
+            classes={{ primary: classes.title }}
+            primary={title}
           />
           <ListItemIcon>
             <IconButton
@@ -94,50 +105,31 @@ class TodoDisplay extends Component {
             </IconButton>
           </ListItemSecondaryAction>
         </ListItem>
-        <Collapse in={this.state.open} timeout="auto" unmountOnExit>
+        <Collapse in={descriptionDisplayed} timeout="auto" unmountOnExit>
           <List component="div">
-            <ListItem button divider={this.props.divider}>
-              <ListItemText inset>{this.props.description}</ListItemText>
+            <ListItem button divider={divider}>
+              <ListItemText inset>{description}</ListItemText>
             </ListItem>
           </List>
         </Collapse>
-        <Collapse in={this.state.edit} timeout="auto" unmountOnExit>
-          {/* <AddTodoDisplay
+        <Collapse in={edit} timeout="auto" mountOnEnter unmountOnExit>
+          <AddTodoDisplay
+            _id={_id}
+            title={title}
+            description={description}
             type={"Edit"}
-            title={this.props.title}
-            description={this.props.description}
-            onChange={this.props.onChange}
-            addTodo={this.props.editTodo}
-          /> */}
-          {this.props.children}
+            changeTodo={this.editTodo}
+          />
         </Collapse>
-        <Modal open={this.state.modal}>
-          <div className={this.props.classes.modal}>
-            <Typography
-              variant="h6"
-              id="modal-title"
-              style={{ textAlign: "center" }}
-            >
-              Are you sure you would like to delete this ToDo?
-            </Typography>
 
-            <Button
-              variant="contained"
-              color="primary"
-              style={{ marginLeft: 30, marginRight: 150 }}
-              onClick={() => this.handleDelete(this.props._id)}
-            >
-              Yes
-            </Button>
-            <Button
-              variant="contained"
-              color="secondary"
-              onClick={this.handleModal}
-            >
-              No
-            </Button>
-          </div>
-        </Modal>
+        <DeleteTodoModal
+          open={modal}
+          multiple={false}
+          className={classes.modal}
+          handleModal={this.handleModal}
+          deleteTodo={this.handleDelete}
+          todo={_id}
+        />
       </>
     );
   }

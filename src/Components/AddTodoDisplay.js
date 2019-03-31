@@ -3,14 +3,16 @@ import { TextField, Paper, Button, Grid } from "@material-ui/core";
 
 import changeTodo from "./changeTodo";
 
-const AddtodoDisplay = memo(props => {
+const AddtodoDisplay = props => {
   const {
+    _id,
     title,
     description,
     onTitleChange,
     onDescChange,
     changeTodo,
-    type
+    type,
+    resetState
   } = props;
   return (
     <Paper style={{ margin: 16, padding: 16 }}>
@@ -37,7 +39,12 @@ const AddtodoDisplay = memo(props => {
             fullWidth
             color="secondary"
             variant="outlined"
-            onClick={() => changeTodo(title, description)}
+            onClick={async () => {
+              let res = await changeTodo(_id, title, description);
+              if (res.status === 200) {
+                resetState();
+              }
+            }}
           >
             {type}
           </Button>
@@ -45,6 +52,6 @@ const AddtodoDisplay = memo(props => {
       </Grid>
     </Paper>
   );
-});
+};
 
 export default changeTodo(AddtodoDisplay);
