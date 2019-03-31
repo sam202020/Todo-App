@@ -1,4 +1,4 @@
-import React, { memo } from "react";
+import React from "react";
 import { TextField, Paper, Button, Grid } from "@material-ui/core";
 
 import changeTodo from "./changeTodo";

@@ -51,7 +51,7 @@ class App extends Component {
   getToDos = async () => {
     const accessToken = await this.retrieveCurrentUserAccessToken();
     let data = await axios
-      .get("http://localhost:3001/todos", {
+      .get("https://todo-api-sam.azurewebsites.net/todos", {
         headers: {
           accessToken
         }
@@ -71,7 +71,7 @@ class App extends Component {
     let { todos } = this.state;
     const accessToken = await this.retrieveCurrentUserAccessToken();
     let data = await axios
-      .delete(`http://localhost:3001/todos/delete/${todoID}`, {
+      .delete(`https://todo-api-sam.azurewebsites.net/todos/delete/${todoID}`, {
         headers: {
           accessToken
         }
@@ -94,7 +94,7 @@ class App extends Component {
 
     let addedTodo = axios
       .post(
-        "http://localhost:3001/todos",
+        "https://todo-api-sam.azurewebsites.net/todos",
         {
           title,
           description
@@ -127,7 +127,7 @@ class App extends Component {
 
     let editedTodo = axios
       .put(
-        `http://localhost:3001/todos/edit/${todoID}`,
+        `https://todo-api-sam.azurewebsites.net/todos/edit/${todoID}`,
         {
           title,
           description
