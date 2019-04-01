@@ -38,6 +38,8 @@ const styles = theme => ({
   }
 });
 
+// Configure Amplify
+
 Amplify.configure(awsmobile);
 
 class App extends Component {
@@ -154,6 +156,8 @@ class App extends Component {
     return editedTodo;
   };
 
+  // Get the current users's access token to validate access to backend resources:
+
   retrieveCurrentUserAccessToken = async () => {
     const user = await Auth.currentAuthenticatedUser();
     const accessToken = user.signInUserSession.accessToken.jwtToken;
@@ -164,6 +168,8 @@ class App extends Component {
     await Auth.signOut();
   };
 
+  // Controls 'Select All' Utility:
+
   setChecked = (e, checked) => {
     const ids = this.state.todos.map(todo => todo._id);
     if (checked === true) {
@@ -172,6 +178,8 @@ class App extends Component {
       this.setState({ checked: [] });
     }
   };
+
+  // Controls checkboxes for individual todos:
 
   setIndivChecked = (checked, id) => {
     let ids = this.state.checked.map(id => id);
@@ -184,9 +192,13 @@ class App extends Component {
     }
   };
 
+  //Controls Delete todo(s) modal:
+
   handleModal = () => {
     this.setState(state => ({ deleteModal: !state.deleteModal }));
   };
+
+  // get all todos on app render, remove loading spinner
 
   componentDidMount() {
     this.getToDos()
@@ -197,7 +209,7 @@ class App extends Component {
         });
       })
       .catch(() => {
-        this.setState({ loader: false });
+        this.setState({ loader: false }); //remove loading spinner even if getting todos fails, so user can procees with using the app (adding todos)
       });
   }
 
@@ -205,12 +217,16 @@ class App extends Component {
     const { username } = this.props.authData;
     const { todos, loader, checked, deleteModal, addedTodo } = this.state;
     if (loader) {
+
+      // render loading spinner until todos are ready to render:
+
       return (
         <div style={{ position: "fixed", top: "50%", left: "50%" }}>
           <Loader type="Puff" color="#00BFFF" height="100" width="100" />
         </div>
       );
     }
+
     return (
       <>
       <CssBaseline />
@@ -243,6 +259,8 @@ class App extends Component {
                     </Button>
                   </Collapse>
                 </Grid>
+
+               {/* display indvidual todos:  */}
 
                 {todos.map((todo, index) => (
                   <TodoDisplay

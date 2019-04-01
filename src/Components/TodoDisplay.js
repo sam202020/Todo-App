@@ -41,7 +41,9 @@ class TodoDisplay extends Component {
     edit: false
   };
 
-  handleClick = () => {
+  //Toggles display of description text:
+
+  handleDescription = () => {
     this.setState(state => ({
       descriptionDisplayed: !state.descriptionDisplayed
     }));
@@ -67,7 +69,7 @@ class TodoDisplay extends Component {
   editTodo = async (id, title, description) => {
     let edited = await this.props.editTodo(id, title, description);
     if (edited.status === 200) {
-      this.handleEdit();
+      this.handleEdit();  // Close the edit todo dialog if todo was successfully edited.
       return 200;
     }
     return "error";
@@ -86,7 +88,7 @@ class TodoDisplay extends Component {
           />
           <ListItemText primary={date} />
           <ListItemText
-            onClick={this.handleClick}
+            onClick={this.handleDescription}
             classes={{ primary: classes.title }}
             primary={title}
           />

@@ -1,10 +1,14 @@
-import React, { useState, useReducer } from "react";
-import { withStyles } from '@material-ui/core/styles';
+import React, { useReducer } from "react";
+import { withStyles } from "@material-ui/core/styles";
 import { TextField, Paper, Button, Grid } from "@material-ui/core";
 
 import changeTodo from "./changeTodo";
 
+//This component is used for both adding a new todo and editing an existing todo, depending on the prop 'type'.
+
 const initialState = { titleError: false, descError: false };
+
+// handle error states for input fields:
 
 function reducer(state, action) {
   switch (action.type) {
@@ -18,9 +22,9 @@ function reducer(state, action) {
 }
 
 const styles = {
-  'input': {
-    '&::placeholder': {
-      color: 'red'
+  input: {
+    "&::placeholder": {
+      color: "red"
     }
   }
 };
@@ -35,13 +39,20 @@ const AddtodoDisplay = props => {
     onTitleChange,
     onDescChange,
     changeTodo,
-    type,
+    type, // Add or Edit
     resetState,
     errorCheck
   } = props;
+
   let titleErrorStyle, descErrorStyle;
-  if (state.titleError) titleErrorStyle = { classes: {input: props.classes['input']} };
-  if (state.descError) descErrorStyle = { classes: {input: props.classes['input']} };
+
+  // conditionally inject props to input fields if they are in error state:
+
+  if (state.titleError)
+    titleErrorStyle = { classes: { input: props.classes["input"] } };
+  if (state.descError)
+    descErrorStyle = { classes: { input: props.classes["input"] } };
+
   return (
     <Paper style={{ margin: 16, padding: 16 }}>
       <Grid container>

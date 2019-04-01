@@ -1,6 +1,8 @@
 import React from "react";
 import { AppBar, Typography, Toolbar, Paper } from "@material-ui/core";
 
+// Renders background styling, header, and any children
+
 const Layout = props => (
   <Paper
     elevation={0}

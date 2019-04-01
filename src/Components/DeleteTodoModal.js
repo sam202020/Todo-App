@@ -1,18 +1,20 @@
 import React from "react";
 import { Button, Modal, Typography } from "@material-ui/core";
 
+// This component renders a dialog confirming deletion of a todo, both a single todo as well as multiple todos.
+
 const DeleteTodoModal = props => {
   const {
     open,
     className,
     handleModal,
-    multiple,
+    multiple,  // pass multiple={true} for deletion of multiple todos; else it is assumed a single todo is to be deleted
     deleteTodo,
     todo
   } = props;
   let pronoun;
   if (multiple) {
-    pronoun = "these";
+    pronoun = "these";  
   } else {
     pronoun = "this";
   }
